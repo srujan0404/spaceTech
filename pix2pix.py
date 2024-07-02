@@ -235,3 +235,13 @@ tf.keras.utils.plot_model(discriminator, show_shapes=True, dpi=64)
   return total_gen_loss, gan_loss, l1_loss
 
 
+def discriminator_loss(disc_real_output, disc_generated_output):
+  real_loss = loss_object(tf.ones_like(disc_real_output), disc_real_output)
+
+  generated_loss = loss_object(tf.zeros_like(disc_generated_output), disc_generated_output)
+
+  total_disc_loss = real_loss + generated_loss
+
+  return total_disc_loss
+
+
