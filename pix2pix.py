@@ -244,4 +244,10 @@ def discriminator_loss(disc_real_output, disc_generated_output):
 
   return total_disc_loss
 
+generator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
+discriminator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
 
+checkpoint_dir = './kaggle/working'
+checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
+checkpoint = tf.train.Checkpoint(generator=generator,
+                                 discriminator=discriminator)
