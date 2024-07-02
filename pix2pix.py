@@ -88,3 +88,25 @@ def random_jitter(input_image, real_image):
         real_image = tf.image.flip_left_right(real_image)
 
     return input_image, real_image
+
+
+OUTPUT_CHANNELS = 3
+def downsample(filters, size, apply_batchnorm=True):
+  initializer = tf.random_normal_initializer(0., 0.02)
+
+  result = tf.keras.Sequential()
+  result.add(
+      tf.keras.layers.Conv2D(filters, size, strides=2, padding='same',
+                             kernel_initializer=initializer, use_bias=False))
+
+  if apply_batchnorm:
+    result.add(tf.keras.layers.BatchNormalization())
+
+  result.add(tf.keras.layers.LeakyReLU())
+
+  return result
+
+
+down_model = downsample(3, 4)
+down_result = down_model(tf.expand_dims(inp, 0))
+print (down_result.shape)
