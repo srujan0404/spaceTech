@@ -187,3 +187,19 @@ up_model = upsample(3, 4)
 up_result = up_model(down_result)
 print (up_result.shape)
 
+generator = Generator()
+tf.keras.utils.plot_model(generator, show_shapes=True, dpi=64)
+
+LAMBDA = 100
+loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+def generator_loss(disc_generated_output, gen_output, target):
+  gan_loss = loss_object(tf.ones_like(disc_generated_output), disc_generated_output)
+
+  # Mean absolute error
+  l1_loss = tf.reduce_mean(tf.abs(target - gen_output))
+
+  total_gen_loss = gan_loss + (LAMBDA * l1_loss)
+
+  return total_gen_loss, gan_loss, l1_loss
+
+
