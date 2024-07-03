@@ -315,3 +315,34 @@ def train_step(input_image, target, step):
     'disc_loss': disc_loss,
     'step_divided_by_1000': step // 1000  # Assuming you want to include this transformation as well
     }
+
+
+def fit(train_ds, test_ds, steps):
+    example_input, example_target = next(iter(test_ds.take(1)))
+    start = time.time()
+    hist=[]
+
+    for step, (input_image, target) in train_ds.repeat().take(steps).enumerate():
+        if (step) % 1000 == 0:
+            if step != 0:
+                print(f'Time taken for 1000 steps: {time.time()-start:.2f} sec\n')
+
+            start = time.time()
+
+            generate_images(generator, example_input, example_target)
+            print(f"Step: {step//1000}k")
+
+        metrics = train_step(input_image, target, step)
+        hist.append(metrics)
+
+    # Training step
+        if (step+1) % 10 == 0:
+            print('.', end='', flush=True)
+
+
+    # Save (checkpoint) the model every 5k steps
+        if (step + 1) % 5000 == 0:
+            checkpoint.save(file_prefix=checkpoint_prefix)
+    return hist
+
+
