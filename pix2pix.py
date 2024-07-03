@@ -345,4 +345,54 @@ def fit(train_ds, test_ds, steps):
             checkpoint.save(file_prefix=checkpoint_prefix)
     return hist
 
+%load_ext tensorboard
+%tensorboard --logdir {log_dir}
+
+
+hist = fit(train_dataset, test_dataset, steps=4000)
+data = hist
+keys = data[0].keys()
+organized_data = {key: [] for key in keys}
+for item in data:
+    for key in keys:
+        organized_data[key].append(item[key].numpy())
+
+for key in keys:
+    if key == 'step_divided_by_1000':  # Skip 'step_divided_by_1000' for plotting
+        continue
+    plt.figure(figsize=(8, 4))
+    plt.plot(organized_data[key], label=key)
+    plt.title(f'{key} over Steps')
+    plt.xlabel('Step')
+    plt.ylabel(key)
+    plt.legend()
+    plt.show()
+
+
+
+def generate_test_dataset(train_dir, test_dir):
+    eo_dir = os.path.join(train_dir, 'eo')
+    sar_dir = os.path.join(train_dir, 'sar')
+    sar_test_dir = os.path.join(test_dir, 'sar')
+    sar_test_files = glob.glob(os.path.join(sar_test_dir, '**', '*.tif'), recursive=True)
+    eo_files = glob.glob(os.path.join(eo_dir, '**', '*.tif'), recursive=True)
+    filenames = [eo_file.split('/')[-1] for eo_file in eo_files]
+    dataset = []
+    for i in range(len(sar_test_files)):
+        name = filenames[i]
+        input_image = sar_image(sar_test_files[i])
+        real_image = eo_image(os.path.join(eo_dir, name))
+        input_image, real_image = resize(input_image, real_image,
+                                   IMG_HEIGHT, IMG_WIDTH)
+        input_image, real_image = normalize(input_image, real_image)
+        train_datapoint = [real_image, input_image]
+        dataset.append(train_datapoint)
+    return dataset
+
+
+# Run the trained model on examples from the test set
+for inp, tar in test_dataset.take(122):
+  generate_images(generator, inp, tar)
+
+
 
