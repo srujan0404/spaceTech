@@ -251,3 +251,25 @@ checkpoint_dir = './kaggle/working'
 checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
 checkpoint = tf.train.Checkpoint(generator=generator,
                                  discriminator=discriminator)
+
+
+def generate_images(model, test_input, tar):
+  prediction = model(test_input, training=True)
+  plt.figure(figsize=(15, 15))
+
+  display_list = [test_input[0], tar[0], prediction[0]]
+  title = ['Input Image', 'Ground Truth', 'Predicted Image']
+
+  for i in range(3):
+    plt.subplot(1, 3, i+1)
+    plt.title(title[i])
+    # Getting the pixel values in the [0, 1] range to plot.
+    img = display_list[i] * 0.5 + 0.5
+    img_rgb = img[..., ::-1]
+    plt.imshow(img_rgb)
+    plt.axis('off')
+  plt.show()
+
+
+for example_input, example_target in train_dataset.take(1):
+  generate_images(generator, example_input, example_target)
